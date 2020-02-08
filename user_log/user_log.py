@@ -33,22 +33,29 @@ def get_idle_and_working_hours():
     count_idle = 0
     # row is every of fetched data that DateTime, keyboard, mouse and user_name
     for row in fetched_data:
-        # checking idle time, if exceeded 30min add to idle time of user dictionary
-        if count_idle >= 5:
-            if count_idle == 5:
-                unique_users[row[3]]['idle_time'] = unique_users[row[3]].get('idle_time') + datetime.timedelta(0, 300)
-            else:
-                unique_users[row[3]]['idle_time'] = unique_users[row[3]].get('idle_time') + datetime.timedelta(0, 50)
-        if row[1] == 0 and row[2] == 0:
-            count_idle += 1
-        else:
-            if unique_users[row[3]]['start_time'] is None:
-                unique_users[row[3]]['start_time'] = row[0]
-            if unique_users[row[3]]['end_time'] < row[0]:
-                unique_users[row[3]]['end_time'] = row[0]
+        # checking keyboard and mouse clicks and adding working hours
+        if unique_users[row[3]]['start_time'] is None:
+            unique_users[row[3]]['start_time'] = row[0]
+        if unique_users[row[3]]['end_time'] < row[0]:
+            unique_users[row[3]]['end_time'] = row[0]
+        if row[1] != 0 or row[2] != 0:
             unique_users[row[3]]['working_hours'] = unique_users[row[3]].get('working_hours') + datetime.timedelta(0,
                                                                                                                    300)
-            count_idle = 0
+    # checking idle time, if exceeded 30min add to idle time of user dictionary
+    for user in unique_users:
+        count_idle = 0
+        for row in fetched_data:
+            if user == row[3]:
+                if count_idle >= 5:
+                    if count_idle == 5:
+                        unique_users[row[3]]['idle_time'] = unique_users[row[3]].get('idle_time') + datetime.timedelta(
+                            0, 300)
+                    else:
+                        unique_users[row[3]]['idle_time'] = unique_users[row[3]].get('idle_time') + datetime.timedelta(0, 50)
+                if row[1] == 0 and row[2] == 0:
+                    count_idle += 1
+                else:
+                    count_idle = 0
 
     # updating data calculated that working, idle hours and start, end times into database
     for row in unique_users:
